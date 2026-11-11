@@ -532,11 +532,11 @@ td {
             <span class="nav-icon">▧</span>Reports
         </a>
 
-        <a href="#users">
+        <a href="{{ route('users.index') }}">
             <span class="nav-icon">♙</span>Users
         </a>
 
-        <a href="#settings">
+        <a href="{{ url('/settings') }}">
             <span class="nav-icon">⚙</span>Settings
         </a>
     </nav>
@@ -568,7 +568,7 @@ td {
 
             <div class="dropdown" id="profileDropdown">
 
-                <a href="#settings">♙ &nbsp; Profile</a>
+                <a href="{{ url('/settings') }}">♙ &nbsp; Profile</a>
 
                 @auth
                     <form action="{{ route('logout') }}" method="POST">

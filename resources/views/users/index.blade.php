@@ -217,12 +217,12 @@ select {
 
         <div class="card">
             <h3>Administrators</h3>
-            <h2>{{ $totalAdmins }}</h2>
+            <h2>{{ $adminUsers }}</h2>
         </div>
 
         <div class="card">
             <h3>Regular Users</h3>
-            <h2>{{ $totalRegularUsers }}</h2>
+            <h2>{{ $regularUsers }}</h2>
         </div>
 
     </div>

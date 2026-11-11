@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers;
@@ -23,7 +22,7 @@ class UsersController extends Controller
         $adminUsers = User::where('role', 'admin')->count();
 
         // REGULAR USERS
-        $regularUsers = User::where('role', 'user')->count();
+        $regularUsers = User::where('role', '!=', 'admin')->count();
 
         return view('users.index', compact(
             'users',
