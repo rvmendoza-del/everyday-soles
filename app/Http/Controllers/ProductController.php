@@ -14,7 +14,43 @@ class ProductController extends Controller
     {
         $products = Product::all();
 
-        return view('products.index', compact('products'));
+        $totalProducts = $products->count();
+
+        $totalStock = $products->sum(
+            fn($product) => (int) ($product->quantity ?? 0)
+        );
+
+        $lowStockProducts = $products->filter(
+            fn($product) => (int) ($product->quantity ?? 0) <= 5
+        );
+
+        $inventoryValue = $products->sum(
+            fn($product) =>
+                (float) ($product->price ?? 0) *
+                (int) ($product->quantity ?? 0)
+        );
+
+        $brandSummary = $products
+            ->groupBy(fn($product) => $product->brand ?: 'Uncategorized')
+            ->map(fn($items) => $items->count())
+            ->sortDesc();
+
+        $categorySummary = $products
+            ->groupBy(fn($product) => $product->category ?: 'Uncategorized')
+            ->map(fn($items) => $items->sum(
+                fn($product) => (int) ($product->quantity ?? 0)
+            ))
+            ->sortDesc();
+
+        return view('products.index', compact(
+            'products',
+            'totalProducts',
+            'totalStock',
+            'lowStockProducts',
+            'inventoryValue',
+            'brandSummary',
+            'categorySummary'
+        ));
     }
 
     // DASHBOARD JSON DATA
