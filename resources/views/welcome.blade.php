@@ -1,362 +1,1319 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<title>Everyday Soles | Inventory</title>
+<title>Everyday Soles | Dashboard</title>
+
 <style>
-* { box-sizing: border-box; }
-body { margin:0; font-family:Arial,sans-serif; background:#f4f6fa; color:#172033; }
-header { background:#172033; color:white; padding:22px 6%; }
-header h1 { margin:0; font-size:25px; }
-header p { color:#bfc9d8; margin:6px 0 0; }
-main { max-width:1200px; margin:auto; padding:32px 20px; }
-h2 { margin:0 0 20px; }
-.stats { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
-.card,.panel { background:white; padding:24px; border-radius:12px; box-shadow:0 2px 12px #1720330d; }
-.card span { color:#68758a; }
-.card strong { display:block; font-size:34px; margin-top:12px; }
-.panel { margin-top:25px; overflow-x:auto; }
-.toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-input,select,textarea { padding:12px; border:1px solid #d7deea; border-radius:8px; width:100%; font:inherit; }
-#search { max-width:280px; }
-button { background:#172033; color:white; padding:12px 16px; border:0; border-radius:8px; cursor:pointer; }
-button:hover { opacity:.85; }
-button:disabled { opacity:.5; cursor:wait; }
-.edit { background:#2563eb; }
-.delete { background:#dc2626; }
-.cancel { background:#68758a; }
-table { width:100%; border-collapse:collapse; margin-top:18px; }
-th,td { padding:14px; text-align:left; border-bottom:1px solid #e8edf3; }
-th { background:#f8fafc; color:#68758a; }
-.actions { display:flex; gap:6px; }
-#message { color:#68758a; }
-#notice { margin-top:14px; }
-.form-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
-.form-grid label { display:block; margin-bottom:6px; font-weight:bold; }
-.form-actions { display:flex; gap:10px; margin-top:18px; }
-.hidden { display:none; }
-@media(max-width:650px) {
-.stats,.form-grid { grid-template-columns:1fr; }
-#search { max-width:100%; }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #090909;
+    color: white;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    cursor: pointer;
+    font: inherit;
+}
+
+.app {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 270px;
+    min-height: 100vh;
+    background: #101010;
+    border-right: 1px solid #252525;
+    padding: 25px 16px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.logo {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.logo-icon {
+    font-size: 42px;
+    color: #ff263c;
+}
+
+.logo h2 {
+    font-size: 23px;
+    margin: 7px 0;
+}
+
+.logo p {
+    font-size: 13px;
+    color: #aaa;
+}
+
+.nav-title {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #777;
+    margin: 15px 12px;
+}
+
+nav {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+nav a {
+    padding: 15px;
+    border-radius: 10px;
+    color: #ddd;
+    font-size: 15px;
+    font-weight: bold;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+}
+
+nav a:hover,
+nav a.active {
+    background: #a51022;
+    color: white;
+}
+
+.nav-icon {
+    font-size: 20px;
+    width: 25px;
+    text-align: center;
+}
+
+.sidebar-bottom {
+    margin-top: auto;
+    text-align: center;
+    color: #9d1829;
+    font-size: 65px;
+    padding-top: 35px;
+}
+
+/* MAIN */
+.main {
+    flex: 1;
+    min-width: 0;
+    padding: 25px 28px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    gap: 15px;
+}
+
+.header h1 {
+    font-size: 30px;
+    margin-bottom: 7px;
+}
+
+.header p {
+    color: #aaa;
+    font-size: 15px;
+}
+
+.profile {
+    position: relative;
+}
+
+.profile-button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: none;
+    border: 0;
+    color: white;
+    font-weight: bold;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #292929;
+    display: grid;
+    place-items: center;
+    font-size: 20px;
+}
+
+.dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 48px;
+    background: #202020;
+    border: 1px solid #333;
+    border-radius: 10px;
+    width: 180px;
+    padding: 10px;
+    z-index: 10;
+}
+
+.dropdown.show {
+    display: block;
+}
+
+.dropdown a,
+.dropdown button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: none;
+    border: 0;
+    text-align: left;
+    color: white;
+}
+
+.dropdown button {
+    color: #ff3549;
+}
+
+/* STATISTICS */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.stat-card {
+    background: linear-gradient(140deg, #1a1a1a, #101010);
+    border: 1px solid #292929;
+    border-radius: 16px;
+    padding: 22px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    min-width: 0;
+}
+
+.stat-icon {
+    width: 55px;
+    height: 55px;
+    flex-shrink: 0;
+    background: #340e15;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    color: #ff3045;
+    font-size: 27px;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: #bbb;
+    margin-bottom: 10px;
+}
+
+.stat-number {
+    font-size: 32px;
+    font-weight: bold;
+    overflow-wrap: anywhere;
+}
+
+.stat-change {
+    font-size: 12px;
+    color: #19d7a0;
+    margin-top: 8px;
+}
+
+/* PANELS */
+.grid-two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.grid-bottom {
+    display: grid;
+    grid-template-columns: .9fr 1.2fr;
+    gap: 20px;
+}
+
+.panel {
+    background: linear-gradient(140deg, #171717, #101010);
+    border: 1px solid #282828;
+    border-radius: 17px;
+    padding: 22px;
+    min-width: 0;
+}
+
+.panel h2 {
+    font-size: 19px;
+    margin-bottom: 20px;
+}
+
+.chart {
+    width: 100%;
+    height: 230px;
+    display: block;
+}
+
+.donut-layout {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.donut {
+    width: 190px;
+    height: 190px;
+    border-radius: 50%;
+    background: #383838;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.donut:after {
+    content: "";
+    position: absolute;
+    inset: 40px;
+    background: #171717;
+    border-radius: 50%;
+}
+
+.donut-center {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 27px;
+    font-weight: bold;
+}
+
+.donut-center small {
+    font-size: 13px;
+    font-weight: normal;
+    margin-top: 5px;
+    color: #ddd;
+}
+
+.legend {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 13px;
+    justify-content: space-between;
+}
+
+.legend-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* TABLE */
+.panel-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.panel-heading h2 {
+    margin: 0;
+}
+
+.view-all {
+    color: #ff3448;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.view-all:hover {
+    color: #ff7b87;
+    text-decoration: underline;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 560px;
+}
+
+th {
+    background: #292929;
+    text-align: left;
+    padding: 14px;
+    font-size: 13px;
+    color: #ddd;
+}
+
+td {
+    padding: 15px 12px;
+    border-bottom: 1px solid #303030;
+    font-size: 13px;
+}
+
+.shoe {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+}
+
+.shoe-icon {
+    font-size: 23px;
+}
+
+.status {
+    background: #721823;
+    color: #ffadb4;
+    padding: 7px 11px;
+    border-radius: 20px;
+    font-size: 11px;
+}
+
+.status.good {
+    background: #144c39;
+    color: #8bf0c6;
+}
+
+/* FOOTER */
+.footer {
+    text-align: center;
+    color: #666;
+    font-size: 11px;
+    padding: 25px;
+}
+
+/* RESPONSIVE */
+@media(max-width:1150px) {
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid-bottom {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media(max-width:850px) {
+    .sidebar {
+        width: 210px;
+    }
+
+    .main {
+        padding: 20px 15px;
+    }
+
+    .grid-two {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media(max-width:600px) {
+    .app {
+        display: block;
+    }
+
+    .sidebar {
+        width: 100%;
+        min-height: auto;
+    }
+
+    .logo {
+        margin-bottom: 15px;
+    }
+
+    nav {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .nav-title,
+    .sidebar-bottom {
+        display: none;
+    }
+
+    .main {
+        padding: 20px 12px;
+    }
+
+    .header h1 {
+        font-size: 23px;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+        padding: 17px;
+    }
+
+    .profile-button .admin-name {
+        display: none;
+    }
 }
 </style>
 </head>
+
 <body>
 
-<header>
-<h1>EVERYDAY SOLES</h1>
-<p>Shoe Inventory Management System</p>
-</header>
+<div class="app">
 
-<main>
-<h2>Inventory Dashboard</h2>
+<!-- SIDEBAR -->
+<aside class="sidebar">
 
-<div class="stats">
-<div class="card">
-<span>Total Products</span>
-<strong id="total">0</strong>
-</div>
-<div class="card">
-<span>Total Stock Units</span>
-<strong id="stock">0</strong>
-</div>
-<div class="card">
-<span>Low Stock Products (5 or less)</span>
-<strong id="low">0</strong>
-</div>
-</div>
+    <div class="logo">
+        <div class="logo-icon">👟</div>
+        <h2>Everyday Soles</h2>
+        <p>Sneaker Inventory System</p>
+    </div>
 
-<div class="panel">
-<div class="toolbar">
-<h2>Products</h2>
-<input id="search" placeholder="Search shoes..." oninput="renderProducts()">
-<button onclick="showForm()">+ Add Product</button>
-</div>
-<p id="notice" role="status"></p>
-<p id="message">Loading products...</p>
+    <div class="nav-title">MAIN MENU</div>
 
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Brand</th>
-<th>Category</th>
-<th>Size</th>
-<th>Price</th>
-<th>Stock</th>
-<th>Actions</th>
-</tr>
-</thead>
-<tbody id="productRows"></tbody>
-</table>
-</div>
+    <nav>
+        <a href="{{ route('home') }}"
+           class="{{ request()->routeIs('home') ? 'active' : '' }}">
+            <span class="nav-icon">▣</span>Dashboard
+        </a>
 
-<div class="panel hidden" id="formPanel">
-<h2 id="formTitle">Add Product</h2>
-<form id="productForm">
-<div class="form-grid">
+        <a href="{{ route('products.index') }}">
+            <span class="nav-icon">▢</span>Inventory
+        </a>
 
-<div>
-<label for="name">Shoe Name</label>
-<input id="name" required>
-</div>
+        <a href="{{ route('products.create') }}">
+            <span class="nav-icon">⊕</span>Add Product
+        </a>
 
-<div>
-<label for="brand">Brand</label>
-<input id="brand">
-</div>
+        <a href="{{ route('products.index') }}">
+            <span class="nav-icon">▤</span>Products
+        </a>
 
-<div>
-<label for="category">Category</label>
-<select id="category">
-<option value="">Select Category</option>
-<option>Sneakers</option>
-<option>Running Shoes</option>
-<option>Basketball Shoes</option>
-<option>Casual Shoes</option>
-<option>Sandals</option>
-<option>Formal Shoes</option>
-</select>
-</div>
+        <a href="#analytics">
+            <span class="nav-icon">▥</span>Analytics
+        </a>
 
-<div>
-<label for="size">Size</label>
-<input id="size" placeholder="Example: 42">
-</div>
+        <a href="#reports">
+            <span class="nav-icon">▧</span>Reports
+        </a>
 
-<div>
-<label for="color">Color</label>
-<input id="color">
-</div>
+        <a href="#users">
+            <span class="nav-icon">♙</span>Users
+        </a>
 
-<div>
-<label for="price">Price (PHP)</label>
-<input id="price" type="number" min="0" step="0.01" required>
-</div>
+        <a href="#settings">
+            <span class="nav-icon">⚙</span>Settings
+        </a>
+    </nav>
 
-<div>
-<label for="quantity">Quantity</label>
-<input id="quantity" type="number" min="0" step="1" required>
-</div>
+    <div class="sidebar-bottom">👟</div>
 
-<div>
-<label for="image">Image URL (optional)</label>
-<input id="image" placeholder="https://example.com/shoe.jpg">
-</div>
+</aside>
 
-</div>
+<!-- MAIN CONTENT -->
+<main class="main">
 
-<p><label for="description">Description</label></p>
-<textarea id="description" rows="3"></textarea>
+    <!-- HEADER -->
+    <header class="header" id="dashboard">
 
-<div class="form-actions">
-<button type="submit" id="saveButton">Save Product</button>
-<button type="button" class="cancel" onclick="hideForm()">Cancel</button>
-</div>
-</form>
-</div>
+        <div>
+            <h1>Dashboard</h1>
+            <p>Overview of your sneaker inventory</p>
+        </div>
+
+        <div class="profile">
+
+            <button class="profile-button" onclick="toggleMenu()">
+                <span class="avatar">👤</span>
+                <span class="admin-name">
+                    {{ auth()->user()?->name ?? 'Administrator' }}
+                </span>
+                <span>⌄</span>
+            </button>
+
+            <div class="dropdown" id="profileDropdown">
+
+                <a href="#settings">♙ &nbsp; Profile</a>
+
+                @auth
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit">⇥ &nbsp; Logout</button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}">Login</a>
+                @endauth
+
+            </div>
+        </div>
+    </header>
+
+    <!-- STAT CARDS -->
+    <section class="stats">
+
+        <div class="stat-card">
+            <div class="stat-icon">◇</div>
+            <div>
+                <div class="stat-label">Total Products</div>
+                <div class="stat-number" id="totalProducts">0</div>
+                <div class="stat-change">Live inventory count</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">▦</div>
+            <div>
+                <div class="stat-label">Total Stock Units</div>
+                <div class="stat-number" id="totalStock">0</div>
+                <div class="stat-change">Live stock quantity</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">⚠</div>
+            <div>
+                <div class="stat-label">Low Stock Products</div>
+                <div class="stat-number" id="lowStockCount">0</div>
+                <div class="stat-change" style="color:#ff4051">
+                    5 units or fewer
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">₱</div>
+            <div>
+                <div class="stat-label">Inventory Value</div>
+                <div class="stat-number" id="inventoryValue">₱0.00</div>
+                <div class="stat-change">Price × quantity</div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- CHARTS -->
+    <section class="grid-two" id="analytics">
+
+        <div class="panel">
+            <h2>Stock Overview by Category</h2>
+            <svg id="categoryChart"
+                 class="chart"
+                 viewBox="0 0 600 230"
+                 preserveAspectRatio="none">
+            </svg>
+        </div>
+
+        <div class="panel">
+            <h2>Inventory Trend</h2>
+            <svg id="trendChart"
+                 class="chart"
+                 viewBox="0 0 600 230"
+                 preserveAspectRatio="none">
+            </svg>
+        </div>
+
+    </section>
+
+    <!-- BRAND AND LOW STOCK -->
+    <section class="grid-bottom" id="reports">
+
+        <div class="panel">
+            <h2>Products by Brand</h2>
+
+            <div class="donut-layout">
+
+                <div class="donut">
+                    <div class="donut-center">
+                        <span id="brandTotal">0</span>
+                        <small>Products</small>
+                    </div>
+                </div>
+
+                <div class="legend" id="brandLegend">
+                    <p style="color:#aaa">Loading brand data...</p>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="panel">
+
+            <div class="panel-heading">
+                <h2>Low Stock Report</h2>
+
+                <!-- UPDATED VIEW ALL LINK -->
+                <a class="view-all"
+                   href="{{ route('products.index') }}">
+                    View All
+                </a>
+            </div>
+
+            <div style="overflow-x:auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Brand</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="lowStockRows">
+                        <tr>
+                            <td colspan="4" style="color:#aaa;text-align:center">
+                                Loading inventory...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- INVENTORY SECTION -->
+    <section class="panel" id="inventory" style="margin-top:22px">
+
+        <div class="panel-heading">
+            <h2>Inventory Management</h2>
+            <a href="{{ route('products.index') }}" class="view-all">
+                Manage Products →
+            </a>
+        </div>
+
+        <p style="color:#aaa;font-size:13px;line-height:1.8">
+            Manage your sneaker products, stock quantities, brands,
+            categories, and inventory records through the Products
+            management page.
+        </p>
+
+        <div style="margin-top:18px">
+            <a href="{{ route('products.index') }}"
+               style="display:inline-block;background:#b41025;padding:12px 18px;border-radius:8px;font-size:13px;font-weight:bold">
+                OPEN PRODUCT INVENTORY
+            </a>
+        </div>
+
+    </section>
+
+    <div class="footer">
+        EVERYDAY SOLES INVENTORY MANAGEMENT SYSTEM © 2026
+    </div>
 
 </main>
+</div>
 
 <script>
-let products = [];
-let editingId = null;
 
-const fields = [
-'name','brand','category','size','color',
-'price','quantity','description','image'
+/* CURRENCY AND NUMBER */
+const peso = value =>
+    '₱' + Number(value || 0).toLocaleString('en-PH', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+
+const number = value => Number(value || 0);
+
+const colors = [
+    '#ff243b',
+    '#e33b49',
+    '#b65b64',
+    '#9a3442',
+    '#777',
+    '#c47b83'
 ];
 
-function productId(p) {
-    const id = p._id ?? p.id;
-    if (typeof id === 'string') return id;
-    if (id && typeof id === 'object') {
-        return id.$oid ?? id.oid ?? null;
-    }
-    return id == null ? null : String(id);
+/* SAFE TEXT */
+function safeText(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    })[char]);
 }
 
-function showForm() {
-    editingId = null;
-    document.getElementById('productForm').reset();
-    document.getElementById('formTitle').textContent = 'Add Product';
-    document.getElementById('saveButton').textContent = 'Save Product';
-    document.getElementById('formPanel').classList.remove('hidden');
-    document.getElementById('formPanel').scrollIntoView({behavior:'smooth'});
-}
+/* CATEGORY CHART */
+function drawCategoryChart(products) {
 
-function hideForm() {
-    document.getElementById('formPanel').classList.add('hidden');
-    editingId = null;
-}
+    const svg = document.getElementById('categoryChart');
+    const groups = {};
 
-function editProduct(id) {
-    const p = products.find(item => productId(item) === id);
-    if (!p) return;
+    products.forEach(product => {
+        const category = product.category || 'Others';
 
-    editingId = id;
-    fields.forEach(field => {
-        document.getElementById(field).value = p[field] ?? '';
+        groups[category] =
+            (groups[category] || 0) + number(product.quantity);
     });
 
-    document.getElementById('formTitle').textContent = 'Edit Product';
-    document.getElementById('saveButton').textContent = 'Update Product';
-    document.getElementById('formPanel').classList.remove('hidden');
-    document.getElementById('formPanel').scrollIntoView({behavior:'smooth'});
+    const entries = Object.entries(groups)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+    const max = Math.max(1, ...entries.map(item => item[1]));
+
+    let markup = '';
+
+    [0, 1, 2, 3, 4].forEach(i => {
+
+        const y = 20 + i * 40;
+
+        markup += `
+            <line x1="55" y1="${y}" x2="590" y2="${y}"
+                stroke="#383838"/>
+
+            <text x="45" y="${y + 4}"
+                fill="#ddd"
+                font-size="12"
+                text-anchor="end">
+                ${Math.round(max * (4 - i) / 4)}
+            </text>
+        `;
+    });
+
+    if (!entries.length) {
+
+        markup += `
+            <text x="300" y="120"
+                fill="#aaa"
+                text-anchor="middle">
+                No product data yet
+            </text>
+        `;
+
+    } else {
+
+        const slot = 535 / entries.length;
+
+        entries.forEach((entry, i) => {
+
+            const height = entry[1] / max * 160;
+            const x = 55 + i * slot + (slot - 55) / 2;
+
+            markup += `
+                <rect x="${x}"
+                    y="${180 - height}"
+                    width="55"
+                    height="${height}"
+                    rx="5"
+                    fill="#f32237"/>
+
+                <text x="${x + 27}"
+                    y="215"
+                    fill="#ddd"
+                    font-size="12"
+                    text-anchor="middle">
+                    ${safeText(entry[0].slice(0, 10))}
+                </text>
+            `;
+        });
+    }
+
+    svg.innerHTML = markup;
 }
 
-function renderProducts() {
-    const search = document.getElementById('search').value.toLowerCase();
-    const rows = document.getElementById('productRows');
-    rows.replaceChildren();
+/* INVENTORY TREND CHART */
+async function drawTrendChart() {
 
-    const filtered = products.filter(p =>
-        String(p.name || '').toLowerCase().includes(search) ||
-        String(p.brand || '').toLowerCase().includes(search) ||
-        String(p.category || '').toLowerCase().includes(search)
-    );
+    const svg = document.getElementById('trendChart');
 
-    filtered.forEach(p => {
-        const tr = document.createElement('tr');
-        const values = [
-            p.name, p.brand, p.category, p.size,
-            '₱' + Number(p.price || 0).toFixed(2),
-            p.quantity
-        ];
+    svg.innerHTML = `
+        <text x="300" y="105"
+            fill="#aaa"
+            text-anchor="middle"
+            font-size="14">
+            Loading inventory trend...
+        </text>
+    `;
 
-        values.forEach(value => {
-            const td = document.createElement('td');
-            td.textContent = value ?? '-';
-            tr.appendChild(td);
+    try {
+
+        const response = await fetch('/inventory/trend', {
+            headers: {
+                'Accept': 'application/json'
+            },
+            credentials: 'same-origin'
         });
 
-        const actionTd = document.createElement('td');
-        const actions = document.createElement('div');
-        actions.className = 'actions';
-
-        const id = productId(p);
-
-        if (id) {
-            const edit = document.createElement('button');
-            edit.textContent = 'Edit';
-            edit.className = 'edit';
-            edit.onclick = () => editProduct(id);
-
-            const del = document.createElement('button');
-            del.textContent = 'Delete';
-            del.className = 'delete';
-            del.onclick = () => deleteProduct(id);
-
-            actions.append(edit, del);
+        if (!response.ok) {
+            throw new Error(
+                `Unable to load inventory trend (HTTP ${response.status}).`
+            );
         }
 
-        actionTd.appendChild(actions);
-        tr.appendChild(actionTd);
-        rows.appendChild(tr);
-    });
+        const snapshots = await response.json();
 
-    document.getElementById('message').textContent =
-        filtered.length ? '' : 'No products found.';
-}
+        if (!Array.isArray(snapshots) || snapshots.length === 0) {
 
-async function loadProducts() {
-    try {
-        const response = await fetch('/products', {
-            headers: {'Accept':'application/json'}
+            svg.innerHTML = `
+                <text x="300" y="105"
+                    fill="#aaa"
+                    text-anchor="middle"
+                    font-size="14">
+                    No inventory snapshots recorded yet.
+                </text>
+            `;
+
+            return;
+        }
+
+        const data = snapshots
+            .filter(item => item && item.recorded_at)
+            .sort((a, b) =>
+                new Date(a.recorded_at) - new Date(b.recorded_at)
+            )
+            .slice(-10);
+
+        if (data.length === 0) {
+            svg.innerHTML = `
+                <text x="300" y="105" fill="#aaa"
+                    text-anchor="middle">
+                    No valid trend data available.
+                </text>
+            `;
+            return;
+        }
+
+        const values = data.map(item => number(item.total_stock));
+        const maxValue = Math.max(1, ...values);
+
+        const left = 65;
+        const right = 575;
+        const top = 30;
+        const bottom = 175;
+
+        const chartHeight = bottom - top;
+        const chartWidth = right - left;
+
+        let markup = '';
+
+        /* GRID LINES */
+        for (let i = 0; i <= 4; i++) {
+
+            const y = top + (chartHeight / 4) * i;
+
+            const label = Math.round(
+                maxValue - (maxValue / 4) * i
+            );
+
+            markup += `
+                <line x1="55" y1="${y}"
+                    x2="590" y2="${y}"
+                    stroke="#383838"/>
+
+                <text x="45" y="${y + 4}"
+                    fill="#aaa"
+                    font-size="11"
+                    text-anchor="end">
+                    ${label}
+                </text>
+            `;
+        }
+
+        /* GRAPH POINTS */
+        const points = data.map((item, index) => {
+
+            const x = data.length === 1
+                ? left + chartWidth / 2
+                : left + (chartWidth / (data.length - 1)) * index;
+
+            const y = bottom -
+                (number(item.total_stock) / maxValue) * chartHeight;
+
+            return {
+                x,
+                y,
+                value: number(item.total_stock),
+                date: item.recorded_at
+            };
         });
 
-        if (!response.ok) throw new Error('Could not load products');
+        const linePoints = points
+            .map(point => `${point.x},${point.y}`)
+            .join(' ');
 
-        const data = await response.json();
-        products = Array.isArray(data) ? data : (data.data || []);
+        const areaPoints =
+            `${left},${bottom} ${linePoints} ` +
+            `${points[points.length - 1].x},${bottom}`;
 
-        document.getElementById('total').textContent = products.length;
-        document.getElementById('stock').textContent =
-            products.reduce((sum,p) => sum + Number(p.quantity || 0),0);
-        document.getElementById('low').textContent =
-            products.filter(p => Number(p.quantity || 0) <= 5).length;
+        markup += `
+            <polygon points="${areaPoints}"
+                fill="#ff243b"
+                opacity="0.12"/>
 
-        renderProducts();
-    } catch(error) {
-        document.getElementById('message').textContent =
-            'Error loading products: ' + error.message;
+            <polyline points="${linePoints}"
+                fill="none"
+                stroke="#ff243b"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"/>
+        `;
+
+        /* POINT MARKERS */
+        points.forEach(point => {
+
+            markup += `
+                <circle cx="${point.x}"
+                    cy="${point.y}"
+                    r="5"
+                    fill="#ff243b"
+                    stroke="#171717"
+                    stroke-width="2">
+
+                    <title>${point.value} stock units</title>
+                </circle>
+            `;
+        });
+
+        /* DATE LABELS */
+        const formatDate = value => {
+
+            const date = new Date(value);
+
+            return isNaN(date.getTime())
+                ? ''
+                : date.toLocaleDateString('en-PH', {
+                    month: 'short',
+                    day: 'numeric'
+                });
+        };
+
+        markup += `
+            <text x="${left}" y="205"
+                fill="#aaa"
+                font-size="11"
+                text-anchor="start">
+                ${safeText(formatDate(points[0].date))}
+            </text>
+
+            <text x="${right}" y="205"
+                fill="#aaa"
+                font-size="11"
+                text-anchor="end">
+                ${safeText(formatDate(points[points.length - 1].date))}
+            </text>
+        `;
+
+        if (data.length === 1) {
+
+            markup += `
+                <text x="300" y="225"
+                    fill="#aaa"
+                    font-size="11"
+                    text-anchor="middle">
+                    A new point will appear after the next inventory change.
+                </text>
+            `;
+        }
+
+        svg.innerHTML = markup;
+
+    } catch (error) {
+
+        console.error(error);
+
+        svg.innerHTML = `
+            <text x="300" y="105"
+                fill="#ff8b96"
+                text-anchor="middle"
+                font-size="13">
+                ${safeText(error.message)}
+            </text>
+        `;
     }
 }
 
-async function apiRequest(url, method, body) {
-    const response = await fetch(url, {
-        method,
-        headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/json',
-            'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content
-        },
-        body:body === undefined ? undefined : JSON.stringify(body)
+/* BRAND DONUT CHART */
+function drawBrandChart(products) {
+
+    const counts = {};
+
+    products.forEach(product => {
+
+        const brand = product.brand || 'Others';
+
+        counts[brand] = (counts[brand] || 0) + 1;
     });
 
-    if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        const details = error.errors
-            ? Object.values(error.errors).flat().join(' ')
-            : error.message;
-        throw new Error(details || 'Request failed: ' + response.status);
+    const entries = Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6);
+
+    const total = products.length;
+
+    document.getElementById('brandTotal').textContent = total;
+
+    const donut = document.querySelector('.donut');
+    const legend = document.getElementById('brandLegend');
+
+    if (!entries.length) {
+
+        donut.style.background = '#383838';
+
+        legend.innerHTML =
+            '<p style="color:#aaa">No brand data yet</p>';
+
+        return;
     }
 
-    return response.json();
-}
+    let position = 0;
 
-document.getElementById('productForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
+    const slices = entries.map((entry, index) => {
 
-    const data = {};
-    fields.forEach(field => {
-        data[field] = document.getElementById(field).value;
+        const start = position;
+
+        position += entry[1] / total * 100;
+
+        return `${colors[index % colors.length]} ${start}% ${position}%`;
     });
 
-    data.price = Number(data.price);
-    data.quantity = Number(data.quantity);
+    donut.style.background =
+        `conic-gradient(${slices.join(',')})`;
 
-    const button = document.getElementById('saveButton');
-    button.disabled = true;
+    legend.innerHTML = entries.map((entry, index) => {
 
-    try {
-        const isEditing = editingId !== null;
-        await apiRequest(
-            isEditing ? '/products/' + encodeURIComponent(editingId) : '/products',
-            isEditing ? 'PUT' : 'POST',
-            data
+        const percentage = Math.round(
+            entry[1] / total * 100
         );
 
-        document.getElementById('notice').textContent =
-            isEditing ? 'Product updated successfully!' : 'Product added successfully!';
+        return `
+            <div class="legend-item">
 
-        hideForm();
-        await loadProducts();
-    } catch(error) {
-        document.getElementById('notice').textContent = 'Error: ' + error.message;
-    } finally {
-        button.disabled = false;
+                <span class="legend-name">
+                    <i class="dot"
+                        style="background:${colors[index % colors.length]}">
+                    </i>
+
+                    ${safeText(entry[0])}
+                </span>
+
+                <strong>${percentage}%</strong>
+
+            </div>
+        `;
+
+    }).join('');
+}
+
+/* LOW STOCK REPORT */
+function renderLowStock(products) {
+
+    const rows = document.getElementById('lowStockRows');
+
+    const low = products
+        .filter(product => number(product.quantity) <= 5)
+        .sort((a, b) =>
+            number(a.quantity) - number(b.quantity)
+        )
+        .slice(0, 6);
+
+    if (!low.length) {
+
+        rows.innerHTML = `
+            <tr>
+                <td colspan="4"
+                    style="color:#aaa;text-align:center;padding:20px">
+                    No low-stock products. Great work!
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    rows.innerHTML = low.map(product => {
+
+        const quantity = number(product.quantity);
+
+        const status = quantity <= 0
+            ? 'Out of Stock'
+            : 'Low Stock';
+
+        return `
+            <tr>
+                <td>
+                    <div class="shoe">
+                        <span class="shoe-icon">👟</span>
+                        ${safeText(product.name || 'Unnamed product')}
+                    </div>
+                </td>
+
+                <td>${safeText(product.brand || '-')}</td>
+
+                <td>${quantity}</td>
+
+                <td>
+                    <span class="status">${status}</span>
+                </td>
+            </tr>
+        `;
+
+    }).join('');
+}
+
+/* UPDATE DASHBOARD */
+function updateDashboard(products) {
+
+    const totalStock = products.reduce(
+        (sum, product) =>
+            sum + number(product.quantity), 0
+    );
+
+    const lowStock = products.filter(
+        product => number(product.quantity) <= 5
+    ).length;
+
+    const inventoryValue = products.reduce(
+        (sum, product) =>
+            sum +
+            number(product.price) *
+            number(product.quantity),
+        0
+    );
+
+    document.getElementById('totalProducts').textContent =
+        products.length.toLocaleString('en-PH');
+
+    document.getElementById('totalStock').textContent =
+        totalStock.toLocaleString('en-PH');
+
+    document.getElementById('lowStockCount').textContent =
+        lowStock.toLocaleString('en-PH');
+
+    document.getElementById('inventoryValue').textContent =
+        peso(inventoryValue);
+
+    drawCategoryChart(products);
+    drawTrendChart();
+    drawBrandChart(products);
+    renderLowStock(products);
+}
+
+/* LOAD PRODUCTS FROM MONGODB THROUGH LARAVEL */
+async function loadDashboard() {
+
+    try {
+
+        const response = await fetch('/products/data', {
+            headers: {
+                'Accept': 'application/json'
+            },
+            credentials: 'same-origin'
+        });
+
+        if (!response.ok) {
+
+            throw new Error(
+                response.status === 401 || response.status === 403
+                    ? 'Please sign in with an authorized admin account to view inventory data.'
+                    : `Unable to load products (HTTP ${response.status}).`
+            );
+        }
+
+        const result = await response.json();
+
+        const products = Array.isArray(result)
+            ? result
+            : (result.data || []);
+
+        updateDashboard(products);
+
+    } catch (error) {
+
+        console.error(error);
+
+        document.getElementById('lowStockRows').innerHTML = `
+            <tr>
+                <td colspan="4"
+                    style="color:#ff8b96;padding:20px">
+                    ${safeText(error.message)}
+                </td>
+            </tr>
+        `;
+
+        document.getElementById('brandLegend').innerHTML = `
+            <p style="color:#ff8b96">
+                ${safeText(error.message)}
+            </p>
+        `;
+    }
+}
+
+/* PROFILE DROPDOWN */
+function toggleMenu() {
+
+    document.getElementById('profileDropdown')
+        .classList.toggle('show');
+}
+
+document.addEventListener('click', function(event) {
+
+    const profile = document.querySelector('.profile');
+
+    if (profile && !profile.contains(event.target)) {
+
+        document.getElementById('profileDropdown')
+            .classList.remove('show');
     }
 });
 
-async function deleteProduct(id) {
-    if (!confirm('Are you sure you want to delete this product?')) return;
+/* SIDEBAR ACTIVE LINK */
+document.querySelectorAll('nav a[href^="#"]')
+    .forEach(function(link) {
 
-    try {
-        await apiRequest('/products/' + encodeURIComponent(id),'DELETE');
-        document.getElementById('notice').textContent =
-            'Product deleted successfully!';
-        await loadProducts();
-    } catch(error) {
-        document.getElementById('notice').textContent =
-            'Error: ' + error.message;
-    }
-}
+        link.addEventListener('click', function() {
 
-loadProducts();
+            document.querySelectorAll('nav a')
+                .forEach(item => {
+                    item.classList.remove('active');
+                });
+
+            this.classList.add('active');
+        });
+    });
+
+/* INITIALIZE */
+loadDashboard();
+
 </script>
+
 </body>
 </html>

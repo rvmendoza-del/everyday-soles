@@ -26,6 +26,8 @@ class AuthController extends Controller
             ],
         ]);
 
+        $data['role'] = 'user';
+
         $user = User::create($data);
 
         Auth::login($user);
