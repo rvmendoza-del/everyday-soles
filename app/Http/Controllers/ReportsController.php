@@ -26,29 +26,47 @@ class ReportsController extends Controller
 
         // TOTAL INVENTORY VALUE
         $inventoryValue = $products->sum(function ($product) {
-            return (float) ($product->price ?? 0) *
-                   (int) ($product->quantity ?? 0);
+            return (float) ($product->price ?? 0)
+                * (int) ($product->quantity ?? 0);
         });
 
         // PRODUCTS BY BRAND
+        // Normalize brand names to avoid duplicates
+        // Example: nike, Nike, NIKE = Nike
         $brandSummary = $products
             ->groupBy(function ($product) {
-                return $product->brand ?: 'Unknown';
+                $brand = strtolower(trim((string) ($product->brand ?? '')));
+
+                return $brand === ''
+                    ? 'Unknown'
+                    : ucwords($brand);
             })
             ->map(function ($items) {
                 return $items->count();
-            });
+            })
+            ->sortKeys();
 
         // STOCK BY CATEGORY
+        // Normalize category names
         $categorySummary = $products
             ->groupBy(function ($product) {
-                return $product->category ?: 'Uncategorized';
+                $category = strtolower(trim(
+                    (string) ($product->category ?? '')
+                ));
+
+                return $category === ''
+                    ? 'Uncategorized'
+                    : ucwords($category);
             })
             ->map(function ($items) {
                 return $items->sum(function ($product) {
                     return (int) ($product->quantity ?? 0);
                 });
-            });
+            })
+            ->sortKeys();
+
+        // VERIFY CATEGORY STOCK TOTAL
+        $categoryStockTotal = $categorySummary->sum();
 
         // DISPLAY REPORTS PAGE
         return view('reports.index', compact(
@@ -58,7 +76,8 @@ class ReportsController extends Controller
             'lowStockProducts',
             'inventoryValue',
             'brandSummary',
-            'categorySummary'
+            'categorySummary',
+            'categoryStockTotal'
         ));
     }
 }

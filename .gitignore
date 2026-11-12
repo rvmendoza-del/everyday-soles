@@ -25,3 +25,12 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Local backup files
+*.bak
+*.backup
+*.backup-*
+*-before-management.blade.php
+
+# Node dependencies
+/node_modules

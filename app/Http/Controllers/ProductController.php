@@ -81,7 +81,6 @@ class ProductController extends Controller
         ]);
 
         if ($request->hasFile('image_file')) {
-
             $path = $request->file('image_file')
                 ->store('products', 'public');
 
@@ -90,6 +89,7 @@ class ProductController extends Controller
 
         $product = Product::create($data);
 
+        // RECORD INVENTORY AFTER ADDING PRODUCT
         $this->recordInventorySnapshot();
 
         return response()->json([
@@ -131,6 +131,7 @@ class ProductController extends Controller
             'image_file' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
         ]);
 
+        // HANDLE PRODUCT IMAGE
         if ($request->hasFile('image_file')) {
 
             $oldImage = $product->image;
@@ -152,9 +153,11 @@ class ProductController extends Controller
 
         $product->update($data);
 
+        // RECORD INVENTORY AFTER UPDATING PRODUCT
         $this->recordInventorySnapshot();
 
-        return redirect()->route('products.index')
+        return redirect()
+            ->route('products.index')
             ->with('success', 'Product updated successfully!');
     }
 
@@ -167,6 +170,7 @@ class ProductController extends Controller
 
         $product->delete();
 
+        // DELETE OLD PRODUCT IMAGE
         if ($image && str_contains($image, '/storage/products/')) {
 
             $imagePath = parse_url($image, PHP_URL_PATH);
@@ -176,6 +180,7 @@ class ProductController extends Controller
             );
         }
 
+        // RECORD INVENTORY AFTER DELETING PRODUCT
         $this->recordInventorySnapshot();
 
         return response()->json([
@@ -183,8 +188,8 @@ class ProductController extends Controller
         ]);
     }
 
-    // RECORD INVENTORY SNAPSHOT
-    private function recordInventorySnapshot()
+    // RECORD INVENTORY SNAPSHOT IN MONGODB
+    private function recordInventorySnapshot(): void
     {
         $products = Product::all();
 
@@ -198,10 +203,12 @@ class ProductController extends Controller
                 (int) ($product->quantity ?? 0)
         );
 
+        $productCount = $products->count();
+
         InventorySnapshot::create([
             'total_stock' => $totalStock,
             'inventory_value' => $inventoryValue,
-            'product_count' => $products->count(),
+            'product_count' => $productCount,
             'recorded_at' => now(),
         ]);
     }
@@ -209,20 +216,20 @@ class ProductController extends Controller
     // GET INVENTORY TREND DATA
     public function trend()
     {
-        // CREATE INITIAL SNAPSHOT IF NONE EXISTS
+        // CREATE INITIAL SNAPSHOT ONLY IF NONE EXISTS
         if (InventorySnapshot::count() === 0) {
             $this->recordInventorySnapshot();
         }
 
-        // GET LATEST 30 SNAPSHOTS
+        // GET LATEST 30 INVENTORY SNAPSHOTS
         $snapshots = InventorySnapshot::orderBy(
             'recorded_at',
             'desc'
         )
-        ->limit(30)
-        ->get()
-        ->sortBy('recorded_at')
-        ->values();
+            ->limit(30)
+            ->get()
+            ->sortBy('recorded_at')
+            ->values();
 
         return response()->json($snapshots);
     }

@@ -1,0 +1,29 @@
+﻿services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: everyday-soles:local
+    container_name: everyday-soles-app
+    restart: unless-stopped
+
+    ports:
+      - "8080:80"
+
+    env_file:
+      - .env
+
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: http://localhost:8080
+      DB_CONNECTION: mongodb
+      DB_DATABASE: everyday_soles
+
+    volumes:
+      - laravel_storage:/var/www/html/storage
+      - laravel_bootstrap_cache:/var/www/html/bootstrap/cache
+
+volumes:
+  laravel_storage:
+  laravel_bootstrap_cache:

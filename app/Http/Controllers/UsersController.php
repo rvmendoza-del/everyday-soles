@@ -9,19 +9,18 @@ use Illuminate\Validation\Rule;
 
 class UsersController extends Controller
 {
+    // =====================================
     // DISPLAY ALL USERS
+    // =====================================
+
     public function index()
     {
-        // GET ALL USERS
         $users = User::orderBy('created_at', 'desc')->get();
 
-        // TOTAL USERS
         $totalUsers = User::count();
 
-        // ADMIN USERS
         $adminUsers = User::where('role', 'admin')->count();
 
-        // REGULAR USERS
         $regularUsers = User::where('role', '!=', 'admin')->count();
 
         return view('users.index', compact(
@@ -32,13 +31,21 @@ class UsersController extends Controller
         ));
     }
 
+
+    // =====================================
     // SHOW CREATE USER FORM
+    // =====================================
+
     public function create()
     {
         return view('users.create');
     }
 
+
+    // =====================================
     // SAVE NEW USER
+    // =====================================
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -57,7 +64,11 @@ class UsersController extends Controller
             ->with('success', 'User created successfully!');
     }
 
-    // SHOW EDIT FORM
+
+    // =====================================
+    // SHOW EDIT USER FORM
+    // =====================================
+
     public function edit(string $id)
     {
         $user = User::findOrFail($id);
@@ -65,29 +76,39 @@ class UsersController extends Controller
         return view('users.edit', compact('user'));
     }
 
-    // UPDATE USER
+
+    // =====================================
+    // UPDATE USER INFORMATION
+    // =====================================
+
     public function update(Request $request, string $id)
     {
         $user = User::findOrFail($id);
 
         $data = $request->validate([
             'name' => 'required|string|max:255',
+
             'email' => [
                 'required',
                 'email',
                 'max:255',
                 Rule::unique('users', 'email')->ignore($user->id),
             ],
+
             'role' => 'required|in:admin,user',
+
             'password' => 'nullable|string|min:8|confirmed',
         ]);
 
-        if (!empty($data['password'])) {
-            $user->password = Hash::make($data['password']);
+        // PREVENT CHANGING YOUR OWN ROLE
+        if (
+            (string) $user->id === (string) auth()->id() &&
+            $user->role !== $data['role']
+        ) {
+            return back()->withInput()->withErrors([
+                'role' => 'You cannot change your own administrator role.',
+            ]);
         }
-
-        $user->name = $data['name'];
-        $user->email = $data['email'];
 
         // PREVENT REMOVING THE LAST ADMIN
         if (
@@ -100,7 +121,15 @@ class UsersController extends Controller
             ]);
         }
 
+        // UPDATE PASSWORD ONLY IF PROVIDED
+        if (!empty($data['password'])) {
+            $user->password = Hash::make($data['password']);
+        }
+
+        $user->name = $data['name'];
+        $user->email = $data['email'];
         $user->role = $data['role'];
+
         $user->save();
 
         return redirect()
@@ -108,7 +137,51 @@ class UsersController extends Controller
             ->with('success', 'User updated successfully!');
     }
 
+
+    // =====================================
+    // UPDATE USER ROLE
+    // =====================================
+
+    public function updateRole(Request $request, string $id)
+    {
+        $user = User::findOrFail($id);
+
+        $data = $request->validate([
+            'role' => 'required|in:admin,user',
+        ]);
+
+        // PREVENT CHANGING YOUR OWN ROLE
+        if ((string) $user->id === (string) auth()->id()) {
+            return back()->withErrors([
+                'role' => 'You cannot change your own administrator role.',
+            ]);
+        }
+
+        // PREVENT REMOVING THE LAST ADMIN
+        if (
+            $user->role === 'admin' &&
+            $data['role'] !== 'admin' &&
+            User::where('role', 'admin')->count() <= 1
+        ) {
+            return back()->withErrors([
+                'role' => 'You cannot remove the last administrator.',
+            ]);
+        }
+
+        $user->role = $data['role'];
+
+        $user->save();
+
+        return redirect()
+            ->route('users.index')
+            ->with('success', 'User role updated successfully!');
+    }
+
+
+    // =====================================
     // DELETE USER
+    // =====================================
+
     public function destroy(string $id)
     {
         $user = User::findOrFail($id);

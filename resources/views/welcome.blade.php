@@ -1061,20 +1061,41 @@ async function drawTrendChart() {
     }
 }
 
-/* BRAND DONUT CHART */
+
+/* BRAND DONUT CHART - NORMALIZED BRAND NAMES */
 function drawBrandChart(products) {
 
     const counts = {};
 
     products.forEach(product => {
 
-        const brand = product.brand || 'Others';
+        // GET BRAND NAME
+        const rawBrand = String(product.brand || '').trim();
 
-        counts[brand] = (counts[brand] || 0) + 1;
+        // USE OTHERS IF BRAND IS EMPTY
+        const brand = rawBrand || 'Others';
+
+        // NORMALIZE BRAND FOR GROUPING
+        const key = brand.toLowerCase().replace(/\s+/g, ' ');
+
+        // CLEAN DISPLAY NAME
+        const displayName = brand
+            .toLowerCase()
+            .replace(/\b[a-z]/g, letter => letter.toUpperCase());
+
+        if (!counts[key]) {
+            counts[key] = {
+                name: displayName,
+                count: 0
+            };
+        }
+
+        counts[key].count++;
     });
 
-    const entries = Object.entries(counts)
-        .sort((a, b) => b[1] - a[1])
+    // SORT BRANDS BY PRODUCT COUNT
+    const entries = Object.values(counts)
+        .sort((a, b) => b.count - a.count)
         .slice(0, 6);
 
     const total = products.length;
@@ -1084,7 +1105,7 @@ function drawBrandChart(products) {
     const donut = document.querySelector('.donut');
     const legend = document.getElementById('brandLegend');
 
-    if (!entries.length) {
+    if (!entries.length || total === 0) {
 
         donut.style.background = '#383838';
 
@@ -1100,7 +1121,7 @@ function drawBrandChart(products) {
 
         const start = position;
 
-        position += entry[1] / total * 100;
+        position += (entry.count / total) * 100;
 
         return `${colors[index % colors.length]} ${start}% ${position}%`;
     });
@@ -1108,10 +1129,11 @@ function drawBrandChart(products) {
     donut.style.background =
         `conic-gradient(${slices.join(',')})`;
 
+    // DISPLAY BRAND LEGEND
     legend.innerHTML = entries.map((entry, index) => {
 
         const percentage = Math.round(
-            entry[1] / total * 100
+            (entry.count / total) * 100
         );
 
         return `
@@ -1119,10 +1141,10 @@ function drawBrandChart(products) {
 
                 <span class="legend-name">
                     <i class="dot"
-                        style="background:${colors[index % colors.length]}">
+                       style="background:${colors[index % colors.length]}">
                     </i>
 
-                    ${safeText(entry[0])}
+                    ${safeText(entry.name)}
                 </span>
 
                 <strong>${percentage}%</strong>
@@ -1132,6 +1154,7 @@ function drawBrandChart(products) {
 
     }).join('');
 }
+
 
 /* LOW STOCK REPORT */
 function renderLowStock(products) {

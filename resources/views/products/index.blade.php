@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<title>Reports | Everyday Soles</title>
+<title>Products Management | Everyday Soles</title>
 
 <style>
 * {
@@ -35,9 +35,7 @@ body {
     margin-bottom: 30px;
 }
 
-h1 {
-    font-size: 30px;
-}
+h1 { font-size: 30px; }
 
 .subtitle {
     color: #aaa;
@@ -62,18 +60,26 @@ h1 {
     cursor: pointer;
 }
 
-.btn:hover {
-    background: #a50c25;
-}
+.btn:hover { background: #a50c25; }
 
 .btn-secondary {
     background: #292929;
     border: 1px solid #444;
 }
 
-.btn-secondary:hover {
-    background: #444;
+.btn-secondary:hover { background: #444; }
+
+.btn-edit {
+    background: #343434;
+    padding: 8px 12px;
 }
+
+.btn-delete {
+    background: #641421;
+    padding: 8px 12px;
+}
+
+.btn-delete:hover { background: #a50c25; }
 
 .summary {
     display: grid;
@@ -97,7 +103,7 @@ h1 {
 
 .card h2 {
     color: #ff4051;
-    font-size: 28px;
+    font-size: 27px;
     overflow-wrap: anywhere;
 }
 
@@ -107,25 +113,41 @@ h1 {
     font-size: 12px;
 }
 
-.panel {
-    margin-bottom: 25px;
-}
+.panel { margin-bottom: 25px; }
 
 .panel h2 {
     font-size: 20px;
     margin-bottom: 20px;
 }
 
-.report-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
 }
+
+.search {
+    width: 320px;
+    max-width: 100%;
+    padding: 12px;
+    border: 1px solid #444;
+    background: #242424;
+    color: white;
+    border-radius: 7px;
+    outline: none;
+}
+
+.search:focus { border-color: #c8102e; }
+
+.table-wrapper { overflow-x: auto; }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 500px;
+    min-width: 950px;
 }
 
 th, td {
@@ -137,18 +159,31 @@ th, td {
 th {
     background: #252525;
     color: #ff4051;
+    font-size: 13px;
 }
 
-td {
-    color: #ddd;
+td { color: #ddd; }
+
+tr:hover { background: #222; }
+
+.product-image {
+    width: 55px;
+    height: 55px;
+    object-fit: contain;
+    background: #242424;
+    border-radius: 7px;
+    padding: 4px;
 }
 
-tr:hover {
-    background: #222;
+.product-name {
+    font-weight: bold;
+    color: white;
 }
 
-.table-wrapper {
-    overflow-x: auto;
+.muted {
+    color: #888;
+    font-size: 12px;
+    margin-top: 5px;
 }
 
 .stock-badge {
@@ -165,81 +200,53 @@ tr:hover {
     color: #64e5ae;
 }
 
-.summary-list {
-    list-style: none;
-}
-
-.summary-list li {
+.actions-cell {
     display: flex;
-    justify-content: space-between;
-    padding: 13px 0;
-    border-bottom: 1px solid #333;
-    color: #ddd;
+    gap: 7px;
 }
 
-.summary-list strong {
-    color: #ff4051;
+.alert {
+    padding: 13px;
+    border-radius: 7px;
+    margin-bottom: 18px;
+    background: #153c28;
+    color: #65e6a0;
+}
+
+.error-message {
+    background: #471b25;
+    color: #ff8795;
 }
 
 .empty {
+    text-align: center;
     color: #888;
-    padding: 15px 0;
+    padding: 30px;
+}
+
+.footer {
+    text-align: center;
+    color: #666;
+    font-size: 12px;
+    padding: 20px;
 }
 
 @media(max-width: 950px) {
-    .summary {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .report-grid {
-        grid-template-columns: 1fr;
-    }
+    .summary { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media(max-width: 550px) {
-    body {
-        padding: 15px;
-    }
-
-    .summary {
-        grid-template-columns: 1fr;
-    }
-
-    .header {
-        align-items: flex-start;
-        flex-direction: column;
-    }
+    body { padding: 15px; }
+    .summary { grid-template-columns: 1fr; }
+    .header { align-items: flex-start; flex-direction: column; }
+    .search { width: 100%; }
 }
 
 @media print {
-    body {
-        background: white;
-        color: black;
-        padding: 10px;
-    }
-
-    .card, .panel {
-        background: white;
-        color: black;
-        border: 1px solid #ccc;
-    }
-
-    .card h2, .summary-list strong {
-        color: #c8102e;
-    }
-
-    .card h3, td, .summary-list li {
-        color: black;
-    }
-
-    .actions, .back-button {
-        display: none;
-    }
-
-    th {
-        background: #eee;
-        color: #c8102e;
-    }
+    body { background: white; color: black; padding: 10px; }
+    .card, .panel { background: white; color: black; }
+    .card h2 { color: #c8102e; }
+    .actions, .toolbar { display: none; }
 }
 </style>
 </head>
@@ -250,22 +257,36 @@ tr:hover {
 
     <div class="header">
         <div>
-            <h1>Inventory Reports</h1>
+            <h1>Products Management</h1>
             <p class="subtitle">
-                Everyday Soles | Inventory Performance Overview
+                Manage your Everyday Soles sneaker inventory.
             </p>
         </div>
 
         <div class="actions">
-            <button class="btn btn-secondary" onclick="window.print()">
-                Print Report
-            </button>
+            <a href="{{ route('home') }}" class="btn btn-secondary">
+                Back to Dashboard
+            </a>
 
-            <button class="btn" onclick="exportCSV()">
-                Export CSV
-            </button>
+            <a href="{{ route('products.create') }}" class="btn">
+                + Add New Product
+            </a>
         </div>
     </div>
+
+    @if(session('success'))
+        <div class="alert">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert error-message">
+            @foreach($errors->all() as $error)
+                <p>{{ $error }}</p>
+            @endforeach
+        </div>
+    @endif
 
     <!-- SUMMARY CARDS -->
 
@@ -280,13 +301,13 @@ tr:hover {
         <div class="card">
             <h3>Total Stock Units</h3>
             <h2>{{ number_format($totalStock) }}</h2>
-            <p>Available inventory quantity</p>
+            <p>Available inventory</p>
         </div>
 
         <div class="card">
             <h3>Low Stock Products</h3>
             <h2>{{ $lowStockProducts->count() }}</h2>
-            <p>Products with 5 units or fewer</p>
+            <p>5 units or fewer</p>
         </div>
 
         <div class="card">
@@ -297,180 +318,220 @@ tr:hover {
 
     </div>
 
-    <!-- BRAND AND CATEGORY REPORTS -->
-
-    <div class="report-grid">
-
-        <div class="panel">
-            <h2>Products by Brand</h2>
-
-            @if($brandSummary->isNotEmpty())
-                <ul class="summary-list">
-                    @foreach($brandSummary as $brand => $count)
-                        <li>
-                            <span>{{ $brand }}</span>
-                            <strong>{{ $count }} Products</strong>
-                        </li>
-                    @endforeach
-                </ul>
-            @else
-                <p class="empty">No brand data available.</p>
-            @endif
-        </div>
-
-        <div class="panel">
-            <h2>Stock by Category</h2>
-
-            @if($categorySummary->isNotEmpty())
-                <ul class="summary-list">
-                    @foreach($categorySummary as $category => $quantity)
-                        <li>
-                            <span>{{ $category }}</span>
-                            <strong>{{ $quantity }} Units</strong>
-                        </li>
-                    @endforeach
-                </ul>
-            @else
-                <p class="empty">No category data available.</p>
-            @endif
-        </div>
-
-    </div>
-
-    <!-- LOW STOCK REPORT -->
+    <!-- PRODUCTS TABLE -->
 
     <div class="panel">
-        <h2>Low Stock Report</h2>
 
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Brand</th>
-                        <th>Category</th>
-                        <th>Stock</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
+        <div class="toolbar">
 
-                <tbody>
-                    @forelse($lowStockProducts as $product)
-                        <tr>
-                            <td>{{ $product->name }}</td>
-                            <td>{{ $product->brand ?: '-' }}</td>
-                            <td>{{ $product->category ?: '-' }}</td>
-                            <td>{{ $product->quantity ?? 0 }}</td>
-                            <td>
-                                <span class="stock-badge">
-                                    Low Stock
-                                </span>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="empty">
-                                No low stock products found.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+            <div>
+                <h2>Product Inventory</h2>
+                <p class="muted">View and manage all registered sneakers.</p>
+            </div>
+
+            <input
+                type="search"
+                id="searchProduct"
+                class="search"
+                placeholder="Search product, brand, category..."
+            >
+
         </div>
-    </div>
-
-    <!-- COMPLETE INVENTORY REPORT -->
-
-    <div class="panel">
-        <h2>Complete Inventory Report</h2>
 
         <div class="table-wrapper">
-            <table id="inventoryTable">
+
+            <table id="productsTable">
+
                 <thead>
                     <tr>
+                        <th>Image</th>
                         <th>Product Name</th>
                         <th>Brand</th>
                         <th>Category</th>
                         <th>Size</th>
                         <th>Price</th>
-                        <th>Stock</th>
+                        <th>Quantity</th>
                         <th>Total Value</th>
+                        <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
 
                 <tbody>
+
                     @forelse($products as $product)
-                        <tr>
-                            <td>{{ $product->name }}</td>
-                            <td>{{ $product->brand ?: '-' }}</td>
-                            <td>{{ $product->category ?: '-' }}</td>
-                            <td>{{ $product->size ?: '-' }}</td>
+
+                        <tr data-product-row="{{ $product->id }}">
+
                             <td>
-                                ₱{{ number_format((float) $product->price, 2) }}
+                                @if($product->image)
+                                    <img
+                                        src="{{ $product->image }}"
+                                        class="product-image"
+                                        alt="Product image"
+                                    >
+                                @else
+                                    <div class="product-image"></div>
+                                @endif
                             </td>
+
+                            <td>
+                                <div class="product-name">
+                                    {{ $product->name }}
+                                </div>
+                                <div class="muted">
+                                    {{ $product->color ?: 'No color specified' }}
+                                </div>
+                            </td>
+
+                            <td>{{ $product->brand ?: '-' }}</td>
+
+                            <td>{{ $product->category ?: '-' }}</td>
+
+                            <td>{{ $product->size ?: '-' }}</td>
+
+                            <td>
+                                ₱{{ number_format((float)$product->price, 2) }}
+                            </td>
+
                             <td>{{ $product->quantity ?? 0 }}</td>
+
                             <td>
                                 ₱{{ number_format(
-                                    (float) $product->price *
-                                    (int) ($product->quantity ?? 0), 2
+                                    (float)$product->price *
+                                    (int)($product->quantity ?? 0), 2
                                 ) }}
                             </td>
+
+                            <td>
+                                @if((int)($product->quantity ?? 0) <= 5)
+                                    <span class="stock-badge">
+                                        Low Stock
+                                    </span>
+                                @else
+                                    <span class="stock-badge normal-badge">
+                                        In Stock
+                                    </span>
+                                @endif
+                            </td>
+
+                            <td>
+                                <div class="actions-cell">
+
+                                    <a
+                                        href="{{ route('products.edit', $product->id) }}"
+                                        class="btn btn-edit"
+                                    >
+                                        Edit
+                                    </a>
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-delete"
+                                        onclick="deleteProduct(
+                                            this,
+                                            '{{ route('products.destroy', $product->id) }}',
+                                            '{{ addslashes($product->name) }}'
+                                        )"
+                                    >
+                                        Delete
+                                    </button>
+
+                                </div>
+                            </td>
+
                         </tr>
+
                     @empty
+
                         <tr>
-                            <td colspan="7" class="empty">
-                                No products available.
+                            <td colspan="10" class="empty">
+                                No products available. Click Add New Product to get started.
                             </td>
                         </tr>
+
                     @endforelse
+
                 </tbody>
+
             </table>
+
         </div>
+
     </div>
 
-    <div class="actions back-button" style="margin-bottom: 25px;">
-        <a href="{{ route('home') }}" class="btn">
-            ← Back to Dashboard
-        </a>
-    </div>
-
-    <p style="text-align:center; color:#666; font-size:12px; margin:25px 0;">
+    <div class="footer">
         EVERYDAY SOLES INVENTORY MANAGEMENT SYSTEM © 2026
-    </p>
+    </div>
 
 </div>
 
 <script>
-function exportCSV() {
 
-    const table = document.getElementById('inventoryTable');
+// SEARCH PRODUCTS
 
-    const rows = Array.from(table.querySelectorAll('tr'));
+document.getElementById('searchProduct').addEventListener('input', function() {
 
-    const csv = rows.map(row => {
-        return Array.from(row.querySelectorAll('th, td'))
-            .map(cell => {
-                return '"' + cell.innerText.replace(/"/g, '""') + '"';
-            })
-            .join(',');
-    }).join('\n');
+    const search = this.value.toLowerCase();
 
-    const blob = new Blob(
-        ['\uFEFF' + csv],
-        { type: 'text/csv;charset=utf-8;' }
-    );
+    document.querySelectorAll('#productsTable tbody tr[data-product-row]')
+        .forEach(function(row) {
 
-    const link = document.createElement('a');
+            row.style.display =
+                row.innerText.toLowerCase().includes(search) ? '' : 'none';
 
-    link.href = URL.createObjectURL(blob);
-    link.download = 'everyday-soles-inventory-report.csv';
+        });
 
-    document.body.appendChild(link);
-    link.click();
+});
 
-    document.body.removeChild(link);
-    URL.revokeObjectURL(link.href);
+
+// DELETE PRODUCT
+
+async function deleteProduct(button, url, productName) {
+
+    if (!confirm('Are you sure you want to delete "' + productName + '"?')) {
+        return;
+    }
+
+    const originalText = button.textContent;
+
+    button.disabled = true;
+    button.textContent = 'Deleting...';
+
+    try {
+
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector(
+                    'meta[name="csrf-token"]'
+                ).content,
+                'Accept': 'application/json'
+            },
+            credentials: 'same-origin'
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || 'Unable to delete product.');
+        }
+
+        alert(result.message || 'Product deleted successfully!');
+
+        window.location.reload();
+
+    } catch(error) {
+
+        alert(error.message);
+
+        button.disabled = false;
+        button.textContent = originalText;
+
+    }
+
 }
+
 </script>
 
 </body>
